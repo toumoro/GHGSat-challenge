@@ -1,11 +1,13 @@
-import { INITIALIZE_DATA } from '../types';
+import { FILTER_DATA, RESET_FILTER } from '../types';
 
 const initialState = [];
 
 const reducer = (state = initialState, { type, payload }) => {
   switch (type) {
-    case INITIALIZE_DATA:
+    case FILTER_DATA:
       return payload;
+    case RESET_FILTER:
+      return initialState;
     default:
       return state;
   }

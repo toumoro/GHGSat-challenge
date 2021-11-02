@@ -2,21 +2,33 @@ import './DataTable.css';
 
 import { DataGridPro, GridToolbar } from '@mui/x-data-grid-pro';
 import React, { useEffect, useState } from 'react';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
+
+import { FILTER_DATA, RESET_FILTER } from '../store/types';
 
 function equalsIgnoreOrder(a, b) {
-  if (!a || !b || (a.length !== b.length)) return false;
+  if (!a || !b || a.length !== b.length) return false;
   const uniqueValues = new Set([...a, ...b]);
-  for (const v of uniqueValues) {
-    const aCount = a.filter(e => e === v).length;
-    const bCount = b.filter(e => e === v).length;
+  for (const value of uniqueValues) {
+    const aCount = a.filter((current) => current === value).length;
+    const bCount = b.filter((current) => current === value).length;
     if (aCount !== bCount) return false;
   }
   return true;
 }
 
+function getFeaturesFromIds(featureCollection, featureIdCollection) {
+  return featureCollection.filter(
+    ({ properties }) => featureIdCollection.includes(properties.id)
+  );
+}
+
 function DataTable({ featureCollection }) {
+  const dispatch = useDispatch();
   const [rows, setRows] = useState([]);
+  const [selectionModel, setSelectionModel] = useState([]);
+  const [visibleRows, setVisibleRows] = useState();
+
   const columns = [
     {
       field: 'description',
@@ -31,15 +43,23 @@ function DataTable({ featureCollection }) {
     },
     { field: 'sensor', headerName: 'Sensor', minWidth: 130 },
   ];
-  const [selectionModel, setSelectionModel] = useState([]);
-  const [visibleRows, setVisibleRows] = useState();
-  
+
   useEffect(() => {
     if (rows.length || featureCollection.length < 1) return;
     setRows(featureCollection.map((feature) => feature.properties));
   }, [rows, featureCollection]);
 
-  console.log("visibleRows", visibleRows); // Only render when the visible columns changes.
+  useEffect(() => {
+    if (visibleRows) {
+      const filteredFeatureCollection = getFeaturesFromIds(
+        featureCollection,
+        visibleRows
+      );
+      dispatch({ type: FILTER_DATA, payload: filteredFeatureCollection }); // send an array of feature ids
+    } else {
+      dispatch({ type: RESET_FILTER }); // reset the store to an empty array
+    }
+  }, [featureCollection, visibleRows, dispatch]);
 
   return (
     <div style={{ height: 800, width: '100%' }}>

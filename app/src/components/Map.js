@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN;
 
-function Map({ featureCollection }) {
+function Map({ featureCollection, filteredFeatureCollection }) {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [lng, setLng] = useState(-71.2);
@@ -58,6 +58,17 @@ function Map({ featureCollection }) {
   });
 
   useEffect(() => {
+    if (!map.current.getSource('observations')) return;
+    let newCollection = featureCollection;
+    if (filteredFeatureCollection.length) {
+      newCollection = filteredFeatureCollection;
+    }
+    map.current
+      .getSource('observations')
+      .setData({ type: 'FeatureCollection', features: newCollection });
+  });
+
+  useEffect(() => {
     if (!map.current) return; // wait for map to initialize
     map.current.on('click', 'observations', (e) => {
       console.log(`[map] click on ${e.features[0].properties.id}`);
@@ -96,5 +107,8 @@ function Map({ featureCollection }) {
   );
 }
 
-const selector = ({ allFeatures }) => ({ featureCollection: allFeatures });
+const selector = ({ allFeatures, filteredFeatures }) => ({
+  featureCollection: allFeatures,
+  filteredFeatureCollection: filteredFeatures,
+});
 export default connect(selector)(Map); // connect the component to the store

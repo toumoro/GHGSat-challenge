@@ -6,7 +6,7 @@ import filteredFeaturesReducer from './reducers/filteredFeatures';
 const reducers = combineReducers({
   allFeatures: allFeaturesReducer,
   selectedFeatures: selectedFeaturesReducer,
-  filteredFEatures: filteredFeaturesReducer,
+  filteredFeatures: filteredFeaturesReducer,
 });
 
 export default reducers;
