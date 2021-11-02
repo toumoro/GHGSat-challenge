@@ -7,12 +7,16 @@ import { SET_SELECTED_FEATURE } from '../store/types';
 
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN;
 
-function Map({ featureCollection, selectedFeature }) {
+function Map({
+  featureCollection,
+  selectedFeature,
+  filteredFeatureCollection,
+}) {
   const mapContainer = useRef(null);
   const map = useRef(null);
-  const [lng, setLng] = useState(-71.2);
-  const [lat, setLat] = useState(46.81);
-  const [zoom, setZoom] = useState(5);
+  const [lng] = useState(-71.2);
+  const [lat] = useState(46.81);
+  const [zoom] = useState(5);
   const dispatch = useDispatch();
 
   const setCoordinates = (feature) => {
@@ -73,6 +77,17 @@ function Map({ featureCollection, selectedFeature }) {
   });
 
   useEffect(() => {
+    if (!map.current.getSource('observations')) return;
+    let newCollection = featureCollection;
+    if (filteredFeatureCollection.length) {
+      newCollection = filteredFeatureCollection;
+    }
+    map.current
+      .getSource('observations')
+      .setData({ type: 'FeatureCollection', features: newCollection });
+  });
+
+  useEffect(() => {
     if (!map.current) return; // wait for map to initialize
     map.current.on('click', 'observations', (e) => {
       console.log(`[map] click on ${e.features[0].properties.id}`);
@@ -83,7 +98,7 @@ function Map({ featureCollection, selectedFeature }) {
         payload: e.features[0],
       }); // send selected feature to the store
     });
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     if (selectedFeature == null) return;
@@ -114,5 +129,6 @@ function Map({ featureCollection, selectedFeature }) {
 const selector = ({ features }) => ({
   featureCollection: features.collection,
   selectedFeature: features.selectedFeature,
+  filteredFeatureCollection: features.filteredCollection,
 });
 export default connect(selector)(Map); // connect the component to the store
