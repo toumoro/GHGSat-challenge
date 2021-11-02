@@ -1649,6 +1649,16 @@
     prop-types "^15.7.2"
     react-is "^17.0.2"
 
+"@mui/x-data-grid@^5.0.0-beta.6":
+  version "5.0.0-beta.6"
+  resolved "https://registry.yarnpkg.com/@mui/x-data-grid/-/x-data-grid-5.0.0-beta.6.tgz#26e0352e6e7ac7b8a1a506766af78eeeffc348a3"
+  integrity sha512-yLINcynxi/qRmES1xLVbUy+799cWs/GOa0HZRQFNbyPGfP/ReUg+Rlr69ggIxOJeD7kcqB8w3GhCYWi+l4klDA==
+  dependencies:
+    "@mui/utils" "^5.0.1"
+    clsx "^1.1.1"
+    prop-types "^15.7.2"
+    reselect "^4.0.0"
+
 "@nodelib/fs.scandir@2.1.4":
   version "2.1.4"
   resolved "https://registry.npmjs.org/@nodelib/fs.scandir/-/fs.scandir-2.1.4.tgz"
