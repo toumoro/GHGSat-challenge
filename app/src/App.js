@@ -11,7 +11,7 @@ import { INITIALIZE_DATA } from './store/types';
 
 function getFormattedDate(timestamp) {
   const date = new Date(timestamp);
-  return date.toLocaleDateString('fr-CA');
+  return date;
 }
 
 function App() {
