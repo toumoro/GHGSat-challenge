@@ -1,12 +1,8 @@
 import { combineReducers } from 'redux';
-import allFeaturesReducer from './reducers/allFeatures';
-import selectedFeaturesReducer from './reducers/selectedFeatures';
-import filteredFeaturesReducer from './reducers/filteredFeatures';
+import FeaturesReducer from './reducers/features';
 
 const reducers = combineReducers({
-  allFeatures: allFeaturesReducer,
-  selectedFeatures: selectedFeaturesReducer,
-  filteredFeatures: filteredFeaturesReducer,
+  features: FeaturesReducer,
 });
 
 export default reducers;

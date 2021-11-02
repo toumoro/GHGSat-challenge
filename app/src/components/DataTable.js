@@ -4,7 +4,7 @@ import { DataGridPro, GridToolbar } from '@mui/x-data-grid-pro';
 import React, { useEffect, useState } from 'react';
 import { connect, useDispatch } from 'react-redux';
 
-import { FILTER_DATA, RESET_FILTER } from '../store/types';
+import { FILTER_DATA, RESET_FILTER, SET_SELECTED_FEATURE } from '../store/types';
 
 function equalsIgnoreOrder(a, b) {
   if (!a || !b || a.length !== b.length) return false;
@@ -23,7 +23,7 @@ function getFeaturesFromIds(featureCollection, featureIdCollection) {
   );
 }
 
-function DataTable({ featureCollection }) {
+function DataTable({ featureCollection, selectedFeature }) {
   const dispatch = useDispatch();
   const [rows, setRows] = useState([]);
   const [selectionModel, setSelectionModel] = useState([]);
@@ -50,6 +50,11 @@ function DataTable({ featureCollection }) {
   }, [rows, featureCollection]);
 
   useEffect(() => {
+    if (selectedFeature == null) return;
+    setSelectionModel(selectedFeature.properties.id);
+  }, [selectedFeature]);
+
+  useEffect(() => {
     if (visibleRows) {
       const filteredFeatureCollection = getFeaturesFromIds(
         featureCollection,
@@ -71,9 +76,18 @@ function DataTable({ featureCollection }) {
         columns={columns}
         pageSize={30}
         rowsPerPageOptions={[30]}
-        onSelectionModelChange={(newSelectionModel) => {
+        onSelectionModelChange={(newSelectionModel, details) => {
           console.log(`[table] click on ${newSelectionModel}`);
+
+          var selectionObject = Object.values(featureCollection).filter(
+            (feature) => feature.properties.id === newSelectionModel[0]
+          )[0];
+
           setSelectionModel(newSelectionModel);
+          dispatch({
+            type: SET_SELECTED_FEATURE,
+            payload: selectionObject,
+          }); // send selected feature to the store
         }}
         onStateChange={({ filter }) => {
           if (!equalsIgnoreOrder(filter.visibleRows, visibleRows)) {
@@ -87,5 +101,9 @@ function DataTable({ featureCollection }) {
   );
 }
 
-const selector = ({ allFeatures }) => ({ featureCollection: allFeatures });
+const selector = ({ features }) => ({
+  featureCollection: features.collection,
+  selectedFeature: features.selectedFeature,
+  filteredFeatureCollection: features.filteredCollection,
+});
 export default connect(selector)(DataTable);
