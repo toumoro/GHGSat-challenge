@@ -1,10 +1,19 @@
 import './DataTable.css';
 
-import { DataGridPro, GridToolbar } from '@mui/x-data-grid-pro';
+import {
+  DataGridPro,
+  GridToolbar,
+  gridVisibleSortedRowIdsSelector,
+  useGridApiRef,
+} from '@mui/x-data-grid-pro';
 import React, { useEffect, useState } from 'react';
 import { connect, useDispatch } from 'react-redux';
 
-import { FILTER_DATA, RESET_FILTER, SET_SELECTED_FEATURE } from '../store/types';
+import {
+  FILTER_DATA,
+  RESET_FILTER,
+  SET_SELECTED_FEATURE,
+} from '../store/types';
 
 function equalsIgnoreOrder(a, b) {
   if (!a || !b || a.length !== b.length) return false;
@@ -18,9 +27,18 @@ function equalsIgnoreOrder(a, b) {
 }
 
 function getFeaturesFromIds(featureCollection, featureIdCollection) {
-  return featureCollection.filter(
-    ({ properties }) => featureIdCollection.includes(properties.id)
+  return featureCollection.filter(({ properties }) =>
+    featureIdCollection.includes(properties.id)
   );
+}
+
+function moveToCoordinates(selectionModel, apiRef) {
+  const rowIndex = gridVisibleSortedRowIdsSelector(
+    apiRef.current.state
+  ).findIndex((id) => id === selectionModel);
+  if (rowIndex < 0) return;
+  const coordinates = { rowIndex, colIndex: 0 };
+  apiRef.current.scrollToIndexes(coordinates);
 }
 
 function DataTable({ featureCollection, selectedFeature }) {
@@ -28,6 +46,8 @@ function DataTable({ featureCollection, selectedFeature }) {
   const [rows, setRows] = useState([]);
   const [selectionModel, setSelectionModel] = useState([]);
   const [visibleRows, setVisibleRows] = useState();
+
+  const apiRef = useGridApiRef();
 
   const columns = [
     {
@@ -52,7 +72,8 @@ function DataTable({ featureCollection, selectedFeature }) {
   useEffect(() => {
     if (selectedFeature == null) return;
     setSelectionModel(selectedFeature.properties.id);
-  }, [selectedFeature]);
+    moveToCoordinates(selectedFeature.properties.id, apiRef);
+  }, [selectedFeature, apiRef]);
 
   useEffect(() => {
     if (visibleRows) {
@@ -69,6 +90,7 @@ function DataTable({ featureCollection, selectedFeature }) {
   return (
     <div style={{ height: 800, width: '100%' }}>
       <DataGridPro
+        apiRef={apiRef}
         rows={rows}
         components={{
           Toolbar: GridToolbar,
