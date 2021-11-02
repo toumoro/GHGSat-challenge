@@ -8,12 +8,14 @@ import {
 } from '@mui/x-data-grid-pro';
 import React, { useEffect, useState } from 'react';
 import { connect, useDispatch } from 'react-redux';
-
 import {
   FILTER_DATA,
   RESET_FILTER,
+  ADD_TO_CART,
   SET_SELECTED_FEATURE,
 } from '../store/types';
+import { IconButton } from '@mui/material';
+import { AddShoppingCart } from '@mui/icons-material';
 
 function equalsIgnoreOrder(a, b) {
   if (!a || !b || a.length !== b.length) return false;
@@ -62,6 +64,27 @@ function DataTable({ featureCollection, selectedFeature }) {
       minWidth: 130,
     },
     { field: 'sensor', headerName: 'Sensor', minWidth: 130 },
+    {
+      field: 'action',
+      headerName: 'Add to cart',
+      minWidth: 100,
+      sortable: false,
+      renderCell: ({ id, row }) => {
+        const onClick = (e) => {
+          e.stopPropagation();
+
+          dispatch({
+            type: ADD_TO_CART,
+            payload: row,
+          });
+        };
+        return (
+          <IconButton onClick={onClick}>
+            <AddShoppingCart />
+          </IconButton>
+        );
+      },
+    },
   ];
 
   useEffect(() => {
