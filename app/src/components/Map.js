@@ -11,7 +11,7 @@ function Map({ featureCollection }) {
   const map = useRef(null);
   const [lng, setLng] = useState(-71.2);
   const [lat, setLat] = useState(46.81);
-  const [zoom, setZoom] = useState(9);
+  const [zoom, setZoom] = useState(5);
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -60,7 +60,7 @@ function Map({ featureCollection }) {
   useEffect(() => {
     if (!map.current) return; // wait for map to initialize
     map.current.on('click', 'observations', (e) => {
-      console.log(`click on ${e.features[0].properties.id}`);
+      console.log(`[map] click on ${e.features[0].properties.id}`);
 
       const coordinates = e.features[0].geometry.coordinates[0];
       const bounds = new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]);
