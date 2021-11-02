@@ -2,16 +2,31 @@ import './Map.css';
 
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
 import React, { useEffect, useRef, useState } from 'react';
-import { connect } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
+import { SET_SELECTED_FEATURE } from '../store/types';
 
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN;
 
-function Map({ featureCollection }) {
+function Map({ featureCollection, selectedFeature }) {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [lng, setLng] = useState(-71.2);
   const [lat, setLat] = useState(46.81);
   const [zoom, setZoom] = useState(5);
+  const dispatch = useDispatch();
+
+  const setCoordinates = (feature) => {
+    const coordinates = feature.geometry.coordinates[0];
+    const bounds = new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]);
+
+    for (const coord of coordinates) {
+      bounds.extend(coord);
+    }
+
+    map.current.fitBounds(bounds, {
+      padding: 20,
+    });
+  };
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -62,18 +77,18 @@ function Map({ featureCollection }) {
     map.current.on('click', 'observations', (e) => {
       console.log(`[map] click on ${e.features[0].properties.id}`);
 
-      const coordinates = e.features[0].geometry.coordinates[0];
-      const bounds = new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]);
-
-      for (const coord of coordinates) {
-        bounds.extend(coord);
-      }
-
-      map.current.fitBounds(bounds, {
-        padding: 20,
-      });
+      setCoordinates(e.features[0]);
+      dispatch({
+        type: SET_SELECTED_FEATURE,
+        payload: e.features[0],
+      }); // send selected feature to the store
     });
-  });
+  }, []);
+
+  useEffect(() => {
+    if (selectedFeature == null) return;
+    setCoordinates(selectedFeature);
+  }, [selectedFeature]);
 
   useEffect(() => {
     if (!map.current) return; // wait for map to initialize
@@ -96,5 +111,8 @@ function Map({ featureCollection }) {
   );
 }
 
-const selector = ({ allFeatures }) => ({ featureCollection: allFeatures });
+const selector = ({ features }) => ({
+  featureCollection: features.collection,
+  selectedFeature: features.selectedFeature,
+});
 export default connect(selector)(Map); // connect the component to the store
